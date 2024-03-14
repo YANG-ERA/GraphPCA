@@ -16,9 +16,9 @@ except FileNotFoundError:
 NAME = 'st-graphpca'
 DESCRIPTION = 'A fast and interpretable dimension reduction algorithm for spatial transcriptomics data.'
 EMAIL = '599568651@qq.com'
-URL="https://github.com/YANG-ERA/GraphPCA/tree/main"
+URL="https://github.com/YANG-ERA/GraphPCA/tree/master"
 AUTHOR ='Jiyuan Yang'
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 
 setup(
     name=NAME,
@@ -32,14 +32,13 @@ setup(
     long_description=long_description,
     packages=find_packages(),
     install_requires=[
-        "numpy",
-        "pandas",
-        "matplotlib",
-        "scipy",
-        "scikit-learn",
-        "networkx",
-        "scanpy",
-        "squidpy"
+        "numpy==1.21.6",
+        "pandas==2.0.1",
+        "matplotlib==3.7.3",
+        "scipy==1.9.1",
+        "scikit-learn==0.24.0",
+        "networkx==2.8.4",
+        "scanpy==1.9.6",
+        "squidpy==1.2.3"
     ]
 )
-

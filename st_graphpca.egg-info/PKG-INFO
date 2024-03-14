@@ -1,13 +1,21 @@
 Metadata-Version: 2.1
 Name: st-graphpca
-Version: 0.0.3
+Version: 0.0.4
 Summary: A fast and interpretable dimension reduction algorithm for spatial transcriptomics data.
-Home-page: https://github.com/YANG-ERA/GraphPCA/tree/main
+Home-page: https://github.com/YANG-ERA/GraphPCA/tree/master
 Author: Jiyuan Yang
 Author-email: 599568651@qq.com
 License: MIT
 Description-Content-Type: text/markdown
 License-File: LICENSE.txt
+Requires-Dist: numpy==1.21.6
+Requires-Dist: pandas==2.0.1
+Requires-Dist: matplotlib==3.7.3
+Requires-Dist: scipy==1.9.1
+Requires-Dist: scikit-learn==0.24.0
+Requires-Dist: networkx==2.8.4
+Requires-Dist: scanpy==1.9.6
+Requires-Dist: squidpy==1.2.3
 
 
 # GraphPCA

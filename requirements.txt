@@ -1,9 +1,9 @@
-numpy
-pandas
-matplotlib
-scipy
-scikit-learn
-networkx
-scanpy
-squidpy
+numpy==1.21.6
+pandas==2.0.1
+matplotlib==3.7.3
+scipy==1.9.1
+scikit-learn==0.24.0
+networkx==2.8.4
+scanpy==1.9.6
+squidpy==1.2.3
 
