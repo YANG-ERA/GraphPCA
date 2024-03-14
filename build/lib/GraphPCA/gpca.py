@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings("ignore")
 from sklearn.cluster import KMeans
 from sklearn.cluster import AgglomerativeClustering
-import utils
+From .utils import *
 
 def set_n_neighbors(platform, n_neighbors):
     if n_neighbors is not None:

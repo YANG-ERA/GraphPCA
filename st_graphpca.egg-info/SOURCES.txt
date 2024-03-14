@@ -4,6 +4,9 @@ setup.py
 GraphPCA/__init__.py
 GraphPCA/gpca.py
 GraphPCA/utils.py
+graphpca/__init__.py
+graphpca/gpca.py
+graphpca/utils.py
 st_graphpca.egg-info/PKG-INFO
 st_graphpca.egg-info/SOURCES.txt
 st_graphpca.egg-info/dependency_links.txt
