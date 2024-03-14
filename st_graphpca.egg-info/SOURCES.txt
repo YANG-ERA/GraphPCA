@@ -1,0 +1,8 @@
+LICENSE.txt
+README.md
+setup.py
+st_graphpca.egg-info/PKG-INFO
+st_graphpca.egg-info/SOURCES.txt
+st_graphpca.egg-info/dependency_links.txt
+st_graphpca.egg-info/requires.txt
+st_graphpca.egg-info/top_level.txt
