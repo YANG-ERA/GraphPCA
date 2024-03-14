@@ -10,7 +10,6 @@ matplotlib
 scipy
 scikit-learn
 networkx
-warnings
 scanpy
 squidpy
 

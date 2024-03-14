@@ -18,7 +18,7 @@ DESCRIPTION = 'A fast and interpretable dimension reduction algorithm for spatia
 EMAIL = '599568651@qq.com'
 URL="https://github.com/YANG-ERA/GraphPCA/tree/main"
 AUTHOR ='Jiyuan Yang'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 setup(
     name=NAME,
@@ -38,7 +38,6 @@ setup(
         "scipy",
         "scikit-learn",
         "networkx",
-        "warnings",
         "scanpy",
         "squidpy"
     ]
