@@ -18,7 +18,7 @@ DESCRIPTION = 'A fast and interpretable dimension reduction algorithm for spatia
 EMAIL = '599568651@qq.com'
 URL="https://github.com/YANG-ERA/GraphPCA/tree/master"
 AUTHOR ='Jiyuan Yang'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 
 setup(
     name=NAME,
@@ -32,13 +32,13 @@ setup(
     long_description=long_description,
     packages=find_packages(),
     install_requires=[
-        "numpy==1.26.4",
+        "numpy==1.23.4",
         "pandas==2.0.1",
         "matplotlib==3.7.3",
         "scipy==1.12.0",
         "scikit-learn==1.4.1.post1",
-        "networkx==2.8.4",
-        "scanpy==1.9.6",
-        "squidpy==1.2.3"
+        "networkx==3.2.1",
+        "scanpy==1.9.8",
+        "squidpy==1.4.1"
     ]
 )
