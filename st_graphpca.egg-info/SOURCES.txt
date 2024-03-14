@@ -1,6 +1,9 @@
 LICENSE.txt
 README.md
 setup.py
+GraphPCA/__init__.py
+GraphPCA/gpca.py
+GraphPCA/utils.py
 st_graphpca.egg-info/PKG-INFO
 st_graphpca.egg-info/SOURCES.txt
 st_graphpca.egg-info/dependency_links.txt
