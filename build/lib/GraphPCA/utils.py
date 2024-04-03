@@ -105,6 +105,6 @@ def make_scatterplot(adata, column_name=None, color_list=None, coord_x="x", coor
             sc.pl.scatter(adata, x=coord_x, y=coord_y, color=column_name, title="", ax=ax, show=False, size=size)
 
     if plot_name is None:
-        plt.savefig("scatterplot_" + column_name, ".pdf")
+        plt.savefig("scatterplot_" + column_name + ".pdf")
     else:
         plt.savefig(plot_name)
