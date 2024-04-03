@@ -52,7 +52,7 @@ def Run_GPCA(adata, location=None, network=None, n_components=50, method="knn", 
     W = W[:, :n_components]
     Z = np.dot(np.dot(Ginv, Expr), W)
     if save_reconstruction:
-        adata.uns["GraphPCA_ReX"] = np.dot(Z,W.T)
+        adata.layers["GraphPCA_ReX"] = np.dot(Z,W.T)
     return Z, W
 
 
