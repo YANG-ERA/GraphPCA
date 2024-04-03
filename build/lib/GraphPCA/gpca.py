@@ -8,6 +8,8 @@ import warnings
 warnings.filterwarnings("ignore")
 from sklearn.cluster import KMeans
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import pairwise_distances as pair
+from sklearn.metrics import adjusted_rand_score as ari_score
 from .utils import *
 
 def set_n_neighbors(platform, n_neighbors):
@@ -23,7 +25,7 @@ def set_n_neighbors(platform, n_neighbors):
 
 
 def Run_GPCA(adata, location=None, network=None, n_components=50, method="knn", platform="Visium", _lambda=0.5,
-             n_neighbors=6):
+             n_neighbors=6, save_reconstruction=False):
 
     global graphL
     Expr = adata.X
@@ -49,6 +51,8 @@ def Run_GPCA(adata, location=None, network=None, n_components=50, method="knn", 
     W = W[:, ::-1]
     W = W[:, :n_components]
     Z = np.dot(np.dot(Ginv, Expr), W)
+    if save_reconstruction:
+        adata.uns["GraphPCA_ReX"] = np.dot(Z,W.T)
     return Z
 
 
