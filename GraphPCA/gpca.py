@@ -53,7 +53,7 @@ def Run_GPCA(adata, location=None, network=None, n_components=50, method="knn", 
     Z = np.dot(np.dot(Ginv, Expr), W)
     if save_reconstruction:
         adata.uns["GraphPCA_ReX"] = np.dot(Z,W.T)
-    return Z
+    return Z, W
 
 
 def consensus_gpca(adata, location, n_components=50, method="knn", platform="Visium",
