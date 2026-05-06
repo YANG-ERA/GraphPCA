@@ -1,14 +1,9 @@
 import io
 import os
 import sys
+import warnings
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
-
-# Try to import pybind11 for C++ compilation
-try:
-    import pybind11
-except ImportError:
-    raise ImportError("pybind11 is required to compile this package. Please run 'pip install pybind11' first.")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -18,7 +13,7 @@ DESCRIPTION = 'A fast and interpretable dimension reduction algorithm for spatia
 EMAIL = '599568651@qq.com'
 URL = "https://github.com/YANG-ERA/GraphPCA/tree/master"
 AUTHOR = 'Jiyuan Yang'
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 
 try:
     with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -36,34 +31,42 @@ def find_eigen():
         os.path.join(sys.prefix, 'include'),            # Conda fallback
         '/opt/homebrew/include/eigen3',                 # Mac Homebrew
         '/usr/local/include/eigen3',                    # Linux/Mac default
-        '/usr/include/eigen3'                           # Linux standard
+        '/usr/include/eigen3',                          # Linux standard
+        os.environ.get('EIGEN3_INCLUDE_DIR', '')        # Allow manual override via env var
     ]
     
     for path in search_paths:
-        if os.path.exists(os.path.join(path, 'Eigen', 'Core')):
+        if path and os.path.exists(os.path.join(path, 'Eigen', 'Core')):
             print(f"✅ Found Eigen3 at: {path}")
             return path
             
-    raise RuntimeError(
-        "❌ Cannot find Eigen3! Please install it via:\n"
-        "   conda install -c conda-forge eigen"
-    )
+    # CRITICAL FIX: Return None instead of raising an error to allow graceful fallback
+    return None
 
-# Retrieve correct Eigen path
-eigen_include_dir = find_eigen()
+ext_modules = []
 
-ext_modules = [
-    Extension(
-        'gpca_cpp',  
-        ['gpca_core.cpp'], 
-        include_dirs=[
-            pybind11.get_include(),
-            pybind11.get_include(user=True),
-            eigen_include_dir, 
-        ],
-        language='c++'
-    ),
-]
+# Try to configure C++ extension, fallback to pure Python if dependencies are missing
+try:
+    import pybind11
+    eigen_include_dir = find_eigen()
+    
+    if eigen_include_dir:
+        ext_modules = [
+            Extension(
+                'gpca_cpp',  
+                ['gpca_core.cpp'], 
+                include_dirs=[
+                    pybind11.get_include(),
+                    pybind11.get_include(user=True),
+                    eigen_include_dir, 
+                ],
+                language='c++'
+            ),
+        ]
+    else:
+        warnings.warn("\n⚠️ WARNING: Eigen3 not found. Skipping C++ extension build. The pure Python version will be built.\n")
+except ImportError:
+    warnings.warn("\n⚠️ WARNING: pybind11 not found. Skipping C++ extension build. The pure Python version will be built.\n")
 
 class BuildExt(build_ext):
     def build_extensions(self):
@@ -95,14 +98,14 @@ setup(
     cmdclass={'build_ext': BuildExt},
     zip_safe=False,
     install_requires=[
-            "numpy>=1.23.4",
-            "pandas>=2.1.0",
-            "matplotlib>=3.7.3",
-            "scipy>=1.12.0",
-            "scikit-learn>=1.4.1",
-            "networkx>=3.2.1",
-            "scanpy>=1.9.8",
-            "squidpy>=1.4.1",
-            "pybind11>=2.10.0"
-        ]
+        "numpy>=1.23.4",
+        "pandas>=2.1.0",
+        "matplotlib>=3.7.3",
+        "scipy>=1.12.0",
+        "scikit-learn>=1.4.1",
+        "networkx>=3.2.1",
+        "scanpy>=1.9.8",
+        "squidpy>=1.4.1",
+        "pybind11>=2.10.0"
+    ]
 )
