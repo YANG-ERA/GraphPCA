@@ -36,9 +36,9 @@ def set_n_neighbors(platform: str = None, n_neighbors: int = None) -> int:
 
 def Run_GPCA(
     adata, 
-    location: np.ndarray, 
+    location: np.ndarray = None, 
     n_components: int = 50, 
-    network=None,               # Retained for backward compatibility to avoid parameter errors
+    network=None,               # Prioritize user-provided graph if not None
     method: str = "knn", 
     platform: str = None, 
     _lambda: float = 0.5, 
@@ -49,8 +49,8 @@ def Run_GPCA(
     random_seed: int = 666, 
     align: bool = True, 
     save_reconstruction: bool = False,
-    mode: str = "standard",     # New acceleration parameter: "standard" or "accelerated"
-    return_log: bool = False    # Compatibility parameter: Set to True if old tutorials unpack ZW_log
+    mode: str = "accelerated",        # "exact", "iterative", or "accelerated"
+    return_log: bool = False    # Compatibility parameter for ZW_log unpacking
 ):
     """
     Run Graph Principal Component Analysis (GPCA).
@@ -58,106 +58,142 @@ def Run_GPCA(
     Parameters:
     -----------
     mode : str
-        "standard" (default): Pure Python execution.
-        "accelerated": Uses C++ backend for fast PCG optimization.
-    return_log : bool
-        If True, returns (Z, W, ZW_log) for backward compatibility. 
-        If False, returns (Z, W) to save memory.
+        "exact" (default): Direct matrix inversion. Best for small sample sizes.
+        "iterative": Pure Python PCG alternating optimization. Good for medium-to-large sizes.
+        "accelerated": C++ backend for PCG alternating optimization. Best for ultra-large sizes.
     """
-    # 1. Initialization and setup
+    # 1. Initialization
     np.random.seed(random_seed)
-    
-    # Convert to CSR format for optimal computational performance
-    Expr = adata.X
-    if not issparse(Expr):
-        Expr = csr_matrix(Expr)
-    else:
-        Expr = Expr.tocsr()
-        
-    n, m = Expr.shape
-    n_neighbors_final = set_n_neighbors(platform, n_neighbors)
-
-    logger.info("Initializing GPCA...")
+    logger.info(f"Initializing GPCA in '{mode}' mode...")
 
     # 2. Construct spatial adjacency graph and Laplacian matrix
-    if method == "knn":
-        graph = kneighbors_graph(
-            np.asarray(location), 
-            n_neighbors_final, 
-            metric='euclidean', 
-            include_self=False
-        )
-        graph = 0.5 * (graph + graph.T)
+    if network is not None:
+        # Use user-provided network graph directly
+        graph = network
+    else:
+        # Construct graph based on location and platform
+        n_neighbors_final = set_n_neighbors(platform, n_neighbors)
+        if method == "knn":
+            graph = kneighbors_graph(
+                np.asarray(location), 
+                n_neighbors_final, 
+                metric='euclidean', 
+                include_self=False
+            )
+            graph = 0.5 * (graph + graph.T)
         
     graphL = csgraph.laplacian(graph, normed=False)
     
-    Phi = eye(location.shape[0], format='csr') + _lambda * graphL
-    Phi = Phi.tocsr()
-
-    # 3. Initial SVD decomposition
-    _, _, VT = randomized_svd(Expr, n_components=n_components, n_iter=5, random_state=random_seed)
-    W = VT.T.copy() 
-    Z = np.zeros((n, n_components), dtype=np.float64)
+    # Base Graph Laplacian matrix
+    Phi = eye(adata.shape[0], format='csr') + _lambda * graphL
     ZW_log = []
 
     # ==========================================
-    # 4. Alternating optimization iterations
+    # Branch 1: Exact Solution (Direct Inversion)
     # ==========================================
-    if mode == "accelerated" and HAS_CPP:
-        logger.info("Starting PCG optimization loop in C++ (Accelerated Mode)...")
-        # Call C++; the C++ version does not return ZW_log to save memory
-        Z, W = gpca_cpp.run_gpca_iterations(Expr, Phi, Z, W, max_iter, kinner, tol)
+    if mode == "exact":
+        logger.info("Starting direct matrix inversion (Exact Mode)...")
+        Expr = adata.X
         
-    else:
-        if mode == "accelerated" and not HAS_CPP:
-            logger.warning("C++ module 'gpca_cpp' not found. Falling back to Python 'standard' mode.")
+        # Dense matrix format is safer and faster for exact direct matrix operations
+        if issparse(Expr):
+            Expr = Expr.todense()
         else:
-            logger.info("Starting PCG optimization loop in Python (Standard Mode)...")
+            Expr = np.asarray(Expr)
             
-        M = diags(Phi.diagonal())
-        for iteration in range(max_iter):
-            iter_start_time = time.time()
-            logger.info(f"Iteration {iteration + 1}/{max_iter} started.")
+        if issparse(Phi):
+            Ginv = np.array(np.linalg.inv(Phi.todense()))
+        else:
+            Ginv = np.array(np.linalg.inv(Phi))
+            
+        C = np.dot(np.dot(Expr.T, Ginv), Expr)
+        lambdas, W = np.linalg.eigh(C)
+        
+        # Select top n_components
+        W = W[:, ::-1]
+        W = W[:, :n_components]
+        Z = np.dot(np.dot(Ginv, Expr), W)
+        
+        if return_log:
+            ZW_log.append([Z.copy(), W.copy()])
 
-            Z_old = Z.copy()
+    # ==========================================
+    # Branch 2: Iterative Optimization (Python or C++)
+    # ==========================================
+    elif mode in ["iterative", "accelerated"]:
+        # CSR Sparse format is optimal for PCG and C++ backend
+        Expr = adata.X
+        if not issparse(Expr):
+            Expr = csr_matrix(Expr)
+        else:
+            Expr = Expr.tocsr()
             
-            # Update Z (PCG solver)
-            for i in range(n_components):
-                b = Expr @ W[:, i] 
-                z_i, _ = cg(Phi, b, x0=Z[:, i], maxiter=kinner, M=M)
-                Z[:, i] = z_i
+        Phi = Phi.tocsr()
+        n, m = Expr.shape
+
+        # Initial SVD decomposition
+        _, _, VT = randomized_svd(Expr, n_components=n_components, n_iter=5, random_state=random_seed)
+        W = VT.T.copy() 
+        Z = np.zeros((n, n_components), dtype=np.float64)
+
+        if mode == "accelerated" and HAS_CPP:
+            logger.info("Starting PCG optimization loop in C++ (Accelerated Mode)...")
+            Z, W = gpca_cpp.run_gpca_iterations(Expr, Phi, Z, W, max_iter, kinner, tol)
+            
+        else:
+            if mode == "accelerated" and not HAS_CPP:
+                logger.warning("C++ module 'gpca_cpp' not found. Falling back to Python 'iterative' mode.")
+            else:
+                logger.info("Starting PCG optimization loop in Python (Iterative Mode)...")
                 
-            # Update W (SVD decomposition)
-            ZtExpr = Z.T @ Expr
-            G, _, Vt = np.linalg.svd(ZtExpr, full_matrices=False)
-            W = Vt.T @ G.T
-            
-            diff = np.linalg.norm(Z - Z_old, ord='fro') / (np.linalg.norm(Z, ord='fro') + 1e-12)
-            elapsed_time = time.time() - iter_start_time
-            
-            logger.info(f"Iteration {iteration + 1} completed in {elapsed_time:.2f}s | Diff: {diff:.4e}")
-            
-            # Record log if backward compatibility is required
-            if return_log:
-                ZW_log.append([Z.copy(), W.copy()])
-            
-            if diff < tol:
-                logger.info(f"Converged successfully in {iteration + 1} iterations.")
-                break
-        else:
-            logger.warning(f"Reached maximum iterations ({max_iter}) without convergence.")
+            M = diags(Phi.diagonal())
+            for iteration in range(max_iter):
+                iter_start_time = time.time()
+                logger.info(f"Iteration {iteration + 1}/{max_iter} started.")
 
-    # 5. Matrix alignment and post-processing
-    if align:
-        _, _, Vt_align = np.linalg.svd(Z, full_matrices=False)
-        V_align = Vt_align.T
-        Z = Z @ V_align
-        W = W @ V_align
+                Z_old = Z.copy()
+                
+                # Update Z (PCG solver)
+                for i in range(n_components):
+                    b = Expr @ W[:, i] 
+                    z_i, _ = cg(Phi, b, x0=Z[:, i], maxiter=kinner, M=M)
+                    Z[:, i] = z_i
+                    
+                # Update W (SVD decomposition)
+                ZtExpr = Z.T @ Expr
+                G, _, Vt = np.linalg.svd(ZtExpr, full_matrices=False)
+                W = Vt.T @ G.T
+                
+                diff = np.linalg.norm(Z - Z_old, ord='fro') / (np.linalg.norm(Z, ord='fro') + 1e-12)
+                elapsed_time = time.time() - iter_start_time
+                
+                logger.info(f"Iteration {iteration + 1} completed in {elapsed_time:.2f}s | Diff: {diff:.4e}")
+                
+                if return_log:
+                    ZW_log.append([Z.copy(), W.copy()])
+                
+                if diff < tol:
+                    logger.info(f"Converged successfully in {iteration + 1} iterations.")
+                    break
+            else:
+                logger.warning(f"Reached maximum iterations ({max_iter}) without convergence.")
 
+        # Matrix alignment (Only strictly needed for iterative/SVD-based outputs)
+        if align:
+            _, _, Vt_align = np.linalg.svd(Z, full_matrices=False)
+            V_align = Vt_align.T
+            Z = Z @ V_align
+            W = W @ V_align
+
+    else:
+        raise ValueError("Invalid mode. Choose from 'exact', 'iterative', or 'accelerated'.")
+
+    # ==========================================
+    # Post-processing and Returns
+    # ==========================================
     if save_reconstruction:
         adata.layers['GraphPCA_ReX'] = np.dot(Z, W.T) 
 
-    # 6. Return results (compatible with old unpacking methods)
     if return_log:
         return Z, W, ZW_log
     

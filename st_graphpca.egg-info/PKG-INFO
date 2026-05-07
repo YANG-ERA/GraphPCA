@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: st-graphpca
-Version: 0.2.1
+Version: 1.0.0
 Summary: A fast and interpretable dimension reduction algorithm for spatial transcriptomics data.
 Home-page: https://github.com/YANG-ERA/GraphPCA/tree/master
 Author: Jiyuan Yang
@@ -21,27 +21,87 @@ Requires-Dist: pybind11>=2.10.0
 
 # GraphPCA
 
-GraphPCA is a novel graph-constrained, interpretable, and quasi-linear dimension-reduction method tailored for spatial transcriptomic data. It leverages the strengths of graphical regularization and Principal Component Analysis (PCA) to extract low-dimensional embeddings of spatial transcriptomes that integrate location information in linear time complexity. The substantial power boost enabled by GraphPCA fertilizes various downstream tasks of spatial transcriptomics data analyses and provides more precise insights into transcriptomic and cellular landscapes of complex tissues.![](./figures/workflow.png) 
+GraphPCA is a novel graph-constrained, interpretable, and quasi-linear dimension-reduction method tailored for spatial transcriptomic data. It leverages the strengths of graphical regularization and Principal Component Analysis (PCA) to extract low-dimensional embeddings of spatial transcriptomes that integrate location information in linear time complexity. ![](./figures/workflow.png) 
 
-# Tutorials
+---
 
-Tutorials can be found here: https://graphpca-analyses.readthedocs.io/en/latest/index.html
+## 🚀 Version 1.0.0: Multi-Engine Architecture
 
-# Software dependencies
+In the **v1.0.0** milestone, GraphPCA introduces a comprehensive multi-engine architecture. You can now seamlessly switch between analytical exact solutions and iterative optimization solvers based on your dataset scale.
 
-numpy
-pandas
-matplotlib
-scipy
-scikit-learn
-networkx
-scanpy
-squidpy
+### 🛠️ Three Computational Modes
 
-# installation
-Install GraphPCA via PyPI by using:
+| Mode | Engine | Best For | Description |
+| :--- | :--- | :--- | :--- |
+| **`exact`** | NumPy/SciPy | Small/Standard Data | **Default.** Direct matrix inversion. Provides the exact analytical solution with zero iteration error. |
+| **`iterative`** | Python PCG | Medium/Large Data | Preconditioned Conjugate Gradient (PCG) in pure Python. Balances memory efficiency and scalability. |
+| **`accelerated`** | C++ Backend | Ultra-Large Data | High-performance C++ implementation (Eigen3). Optimized for **million-level** datasets with 5x-20x speedup. |
 
-```         shell
+### ✨ Technical Highlights
+* **Precision Control**: The `exact` mode ensures the most rigorous results for traditional ST platforms.
+* **Extreme Scalability**: The `accelerated` mode utilizes C++ zero-copy data transfer to shatter the limits of the Python GIL.
+* **Graceful Degradation**: The system automatically detects your environment. If C++ dependencies are missing, it safely falls back to Python modes to ensure zero-crash installation.
+
+---
+
+## 📖 Tutorials
+
+Interactive tutorials and documentation can be found here: 
+[https://graphpca-analyses.readthedocs.io/en/latest/index.html](https://graphpca-analyses.readthedocs.io/en/latest/index.html)
+
+> **⚠️ API Change Note**: Since v0.2.1, `Run_GPCA` returns `Z, W` by default for memory efficiency. If your legacy code expects `Z, W, ZW_log`, please set `return_log=True`.
+
+---
+
+## 📦 Installation
+
+### 1. Standard Installation (Pure Python)
+Supports `exact` and `iterative` modes out of the box:
+```bash
 pip install st-graphpca
 ```
 
+### 2. Accelerated Installation (C++ Backend)
+Required for `accelerated` mode. Please install `Eigen3` **before** installing GraphPCA:
+```bash
+# Recommended: Install Eigen via Conda
+conda install -c conda-forge eigen
+
+# Build GraphPCA with C++ extension
+pip install --no-build-isolation st-graphpca
+```
+
+---
+
+## 💻 Usage Example
+
+```python
+from GraphPCA import Run_GPCA
+
+# Choose the mode that fits your data scale:
+# 1. Exact solution (Default, for small datasets)
+Z, W = Run_GPCA(adata, location, mode="exact")
+
+# 2. Iterative solver (For large datasets, memory efficient)
+Z, W = Run_GPCA(adata, location, mode="iterative")
+
+# 3. C++ Accelerated solver (For million-level datasets)
+Z, W = Run_GPCA(adata, location, mode="accelerated")
+```
+
+---
+
+## 🛠️ Software Dependencies
+
+- `numpy`, `pandas`, `scipy`
+- `matplotlib`, `scikit-learn`
+- `networkx`, `scanpy`, `squidpy`
+- `pybind11` (for C++ acceleration)
+
+---
+
+## 📅 Recent Changes
+
+- **v1.0.0**: **Official Stable Release.** Introduced the Three-Mode Engine architecture (`exact`, `iterative`, `accelerated`) for full-scale data compatibility.
+- **v0.2.1**: Improved build compatibility and enhanced graceful fallback for C++ modules.
+- **v0.2.0**: Major performance release featuring the C++ core and PCG solver.
