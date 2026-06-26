@@ -1,22 +1,63 @@
 cff-version: 1.2.0
-message: "If you use GraphPCA, please cite the software and the GraphPCA paper."
-title: "GraphPCA"
+message: "If you use GraphPCA-Turbo, please cite the GraphPCA-Turbo manuscript and the original GraphPCA article as appropriate, together with this software release."
+title: "GraphPCA-Turbo"
 type: software
 version: "2.0.0"
 date-released: "2026-06-27"
+
 authors:
   - family-names: "Yang"
     given-names: "Jiyuan"
-repository-code: "https://github.com/YANG-ERA/GraphPCA"
-url: "https://github.com/YANG-ERA/GraphPCA"
-license: "MIT"
+
+abstract: "GraphPCA-Turbo is a scalable graph-regularized dimension-reduction framework for single- and multi-sample spatial transcriptomics. Version 2.0.0 includes hierarchical partial pooling, sample-specific and cohort-level loading matrices, rotation-aware convergence diagnostics, and unseen-section projection."
+
+keywords:
+  - "spatial transcriptomics"
+  - "dimension reduction"
+  - "graph regularization"
+  - "principal component analysis"
+  - "multi-sample analysis"
+  - "partial pooling"
+  - "spatial omics"
+
+repository-code: "https://github.com/YANG-ERA/GraphPCA-Turbo"
+url: "https://github.com/YANG-ERA/GraphPCA-Turbo"
+license: MIT
+
 preferred-citation:
   type: article
-  title: "GraphPCA: a fast and interpretable dimension reduction algorithm for spatial transcriptomics data"
+  title: "Ultra-Scalable Dimension Reduction for High-Resolution Spatial Transcriptomics via GraphPCA-Turbo"
   authors:
     - family-names: "Yang"
       given-names: "Jiyuan"
-  journal: "Genome Biology"
-  year: 2024
-  volume: 25
-  start: 287
+    - family-names: "Qi"
+      given-names: "Jinglin"
+    - family-names: "Jiang"
+      given-names: "Xinyi"
+    - family-names: "Chen"
+      given-names: "Xu"
+    - family-names: "Liu"
+      given-names: "Lin"
+    - family-names: "Zheng"
+      given-names: "Xiaoqi"
+  year: 2026
+  status: in-preparation
+
+references:
+  - type: article
+    title: "GraphPCA: a fast and interpretable dimension reduction algorithm for spatial transcriptomics data"
+    authors:
+      - family-names: "Yang"
+        given-names: "Jiyuan"
+      - family-names: "Wang"
+        given-names: "Lu"
+      - family-names: "Liu"
+        given-names: "Lin"
+      - family-names: "Zheng"
+        given-names: "Xiaoqi"
+    journal: "Genome Biology"
+    volume: 25
+    issue: 1
+    start: 287
+    year: 2024
+    doi: "10.1186/s13059-024-03429-x"

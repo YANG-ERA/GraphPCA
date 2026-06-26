@@ -11,7 +11,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 NAME = 'st-graphpca'
 DESCRIPTION = 'Scalable hierarchical graph-regularized dimension reduction for single- and multi-sample spatial transcriptomics.'
 EMAIL = '599568651@qq.com'
-URL = "https://github.com/YANG-ERA/GraphPCA"
+URL = "https://github.com/YANG-ERA/GraphPCA-Turbo"
 AUTHOR = 'Jiyuan Yang'
 VERSION = '2.0.0'
 
