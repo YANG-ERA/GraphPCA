@@ -28,11 +28,11 @@ For one spatial sample, GraphPCA estimates a low-dimensional embedding \(Z\) and
 
 \[
 \min_{Z,W}
-\|X-ZW^	op\|_F^2
+\|X-ZW^\top\|_F^2
 +
-\lambda\,\mathrm{tr}(Z^	op LZ),
+\lambda\,\mathrm{tr}(Z^\top LZ),
 \qquad
-W^	op W=I.
+W^\top W=I.
 \]
 
 Here, \(X\) is the expression matrix, \(L\) is a spatial graph Laplacian, and \(\lambda\) controls graph regularization.
@@ -45,9 +45,9 @@ For samples \(s=1,\ldots,S\), GraphPCA-Turbo v2 estimates sample-specific embedd
 \min_{\{Z_s,W_s\},W_0}
 \sum_{s=1}^{S}q_s
 \left[
-rac{1}{n_s}\|X_s-Z_sW_s^	op\|_F^2
+\frac{1}{n_s}\|X_s-Z_sW_s^\top\|_F^2
 +
-rac{\lambda_s}{n_s}\mathrm{tr}(Z_s^	op L_sZ_s)
+\frac{\lambda_s}{n_s}\mathrm{tr}(Z_s^\top L_sZ_s)
 +
 
 ho_s\|W_s-W_0\|_F^2
@@ -58,9 +58,9 @@ ight],
 subject to
 
 \[
-W_s^	op W_s=I,
+W_s^\top W_s=I,
 \qquad
-W_0^	op W_0=I.
+W_0^\top W_0=I.
 \]
 
 The shrinkage parameter \(
@@ -113,7 +113,10 @@ To force a source build from PyPI:
 ```bash
 conda install -c conda-forge eigen pybind11
 
-python -m pip install   --no-binary st-graphpca   --no-build-isolation   st-graphpca
+python -m pip install \
+  --no-binary st-graphpca \
+  --no-build-isolation \
+  st-graphpca
 ```
 
 If the compiled extension is unavailable, the Python iterative solvers remain available.
