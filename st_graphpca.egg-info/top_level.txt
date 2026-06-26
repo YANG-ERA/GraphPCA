@@ -1,2 +1,1 @@
-gpca_cpp
-graphpca
+GraphPCA

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master, "release/**"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test-pure-python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test tools
+        run: python -m pip install --upgrade pip setuptools wheel pybind11 build pytest
+      - name: Install GraphPCA
+        run: python -m pip install -e .
+      - name: Compile Python modules
+        run: python -m compileall GraphPCA
+      - name: Run tests
+        run: pytest -q
+      - name: Build distributions
+        if: matrix.python-version == '3.11'
+        run: python -m build
