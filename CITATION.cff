@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use GraphPCA, please cite the software and the GraphPCA paper."
+title: "GraphPCA"
+type: software
+version: "2.0.0"
+date-released: "2026-06-27"
+authors:
+  - family-names: "Yang"
+    given-names: "Jiyuan"
+repository-code: "https://github.com/YANG-ERA/GraphPCA"
+url: "https://github.com/YANG-ERA/GraphPCA"
+license: "MIT"
+preferred-citation:
+  type: article
+  title: "GraphPCA: a fast and interpretable dimension reduction algorithm for spatial transcriptomics data"
+  authors:
+    - family-names: "Yang"
+      given-names: "Jiyuan"
+  journal: "Genome Biology"
+  year: 2024
+  volume: 25
+  start: 287

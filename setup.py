@@ -9,11 +9,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # Package meta-data.
 NAME = 'st-graphpca'
-DESCRIPTION = 'A fast and interpretable dimension reduction algorithm for spatial transcriptomics data.'
+DESCRIPTION = 'Scalable hierarchical graph-regularized dimension reduction for single- and multi-sample spatial transcriptomics.'
 EMAIL = '599568651@qq.com'
-URL = "https://github.com/YANG-ERA/GraphPCA/tree/master"
+URL = "https://github.com/YANG-ERA/GraphPCA"
 AUTHOR = 'Jiyuan Yang'
-VERSION = '1.0.0'
+VERSION = '2.0.0'
 
 try:
     with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
