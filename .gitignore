@@ -6,3 +6,15 @@ dist/
 *.egg-info
 *.whl
 *.tar.gz
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Test cache
+.pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
